@@ -73,25 +73,25 @@ def preiction_report(x,y):
     scores_cv_table = pd.DataFrame(scores_cv).T
     print(scores_cv_table)
     best_model = get_Best_Model(models,scores)
-    save_Best_Model(best_model)
+    save_Best_Model(best_model,x,y)
     return scores_cv_table
 
 def get_Best_Model(models,scores):
     max_val=0
     best_model = object
-    for i in range(len(models)):
-        scores =[np.mean(scores[i]['test_precision']),
+    for i in range(len(models)-1):
+        score =[np.mean(scores[i]['test_precision']),
                               np.mean(scores[i]['test_recall']),
                               np.mean(scores[i]['test_f1']),
                               np.mean(scores[i]['test_roc_auc'])
                  ]
-        mean_score = scores.mean()
+        mean_score = np.mean(score)
         if (mean_score>=max_val):
             max_val=mean_score
             best_model= models[i]
     return best_model
 
-def save_Best_Model(model):
+def save_Best_Model(model,x,y):
     model.fit(x, y)
     with open('best_model.pkl', 'wb') as file:
         pickle.dump(model, file)
@@ -100,6 +100,7 @@ def save_Best_Model(model):
 path = "Survival_dataset.csv"
 target = 'In-hospital_death'
 df = load_CSV(path)
+df = df.drop(['Survival', 'Length_of_stay'], axis=1)
 df = fill_NA(df)
 x = df[df.columns.difference([target])]
 y = df[target]
